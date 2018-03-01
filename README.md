@@ -147,7 +147,7 @@ $ vim ~/.homebridge/config.json
     "retryInterval": 500,
     "retry": 4,
     "command": {
-      "on": {
+      "power": {
         "format": "us",
         "freq": 39,
         "data": [2360, 634, 1145, 651, 561, ....]
@@ -164,7 +164,7 @@ $ vim ~/.homebridge/config.json
       }
     },
     "on": ["home", { "delay": 1000, "command": "back" }],
-    "off": ["home", { "command": "on" }]
+    "off": ["home", { "command": "power" }]
   }]
 }
 ```

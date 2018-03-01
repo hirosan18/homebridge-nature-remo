@@ -69,8 +69,7 @@ class NatureRemo {
         host: this.host,
         headers: {
           'Content-Length': postDataStr.length
-        },
-        timeout: this.timeout
+        }
       })
       let data = ''
       const req = http.request(options, res => {
@@ -118,9 +117,9 @@ class NatureRemo {
     this[on ? 'on' : 'off'].forEach((command) => {
       this.queue.push((done) => {
         sleep(command.delay - (Date.now() - this.lastCommandTime)).then(() => {
-          this.log(`> [Exec] "${command.name}"`)
           mainQueue.push(() => {
-            return new Promise((resolve) => {
+            this.log(`> [Exec] "${command.name}"`)
+            return new Promise((resolve, reject) => {
               this.request(command.postData).then(() => {
                 this.log(`>> [Done] "${command.name}"`)
                 this.update(on)
@@ -128,14 +127,23 @@ class NatureRemo {
                 done()
                 resolve()
               }).catch((e) => {
-                this.log(`>> [Error] "${command.name}"`)
-                this.update(e)
-                this.queue.clear()
-                done()
-                resolve()
+                reject(e)
               })
             })
-          }, { delay: this.interval, retry: this.retry, retryInterval: this.retryInterval })
+          }, {
+            delay: this.interval,
+            retry: this.retry,
+            retryInterval: this.retryInterval,
+            error: (e) => {
+              this.log(`>> [Error] "${command.name}"`)
+              this.update(e)
+              this.queue.clear()
+              done()
+              setTimeout(() => {
+                mainQueue.start()
+              }, 0)
+            }
+          })
         })
       })
     })

@@ -1,5 +1,5 @@
 const nock = require('nock')
-const config = require('../config.sample.json')
+const config = require('./config.test.json')
 
 const homebridgeMock = {
   version: 'mock',
@@ -170,7 +170,7 @@ describe('TimerQueue', function () {
 
       natureRemo.setState(true, callback)
       natureRemo.queue.on('end', () => {
-        expect(callback).toHaveBeenCalled()
+        expect(callback).toHaveBeenCalledTimes(1)
         expect(natureRemo.update).toHaveBeenCalledTimes(2)
         done()
       })
@@ -186,7 +186,7 @@ describe('TimerQueue', function () {
 
       natureRemo.setState(false, callback)
       natureRemo.queue.on('end', () => {
-        expect(callback).toHaveBeenCalled()
+        expect(callback).toHaveBeenCalledTimes(1)
         expect(natureRemo.update).toHaveBeenCalledTimes(2)
         done()
       })
@@ -224,18 +224,43 @@ describe('TimerQueue', function () {
       natureRemo1.setState(true, callback)
       natureRemo2.setState(true, callback)
       const promise1 = new Promise(function (resolve) {
-        natureRemo1.queue.on('end', () => {
-          resolve()
-        })
+        natureRemo1.queue.on('end', resolve)
       })
       const promise2 = new Promise(function (resolve) {
-        natureRemo2.queue.on('end', () => {
-          resolve()
-        })
+        natureRemo2.queue.on('end', resolve)
       })
       Promise.all([promise1, promise2]).then(() => {
         expect(callback).toHaveBeenCalledTimes(2)
         expect(natureRemo1.update).toHaveBeenCalledTimes(2)
+        expect(natureRemo2.update).toHaveBeenCalledTimes(2)
+        done()
+      })
+    })
+    it('setState 並列処理でエラー', function (done) {
+      jest.setTimeout(20000)
+      const natureRemo1 = _create(config.accessories[0])
+      const natureRemo2 = _create(config.accessories[1])
+      natureRemo1.request = jest.fn().mockImplementation(() => new Promise((resolve, reject) => {
+        setTimeout(reject, 0)
+      }))
+      natureRemo2.request = jest.fn().mockImplementation(() => new Promise((resolve) => {
+        setTimeout(resolve, 0)
+      }))
+      natureRemo1.update = jest.fn()
+      natureRemo2.update = jest.fn()
+      const callback = jest.fn()
+
+      natureRemo1.setState(true, callback)
+      natureRemo2.setState(true, callback)
+      const promise1 = new Promise(function (resolve) {
+        natureRemo1.queue.on('end', resolve)
+      })
+      const promise2 = new Promise(function (resolve) {
+        natureRemo2.queue.on('end', resolve)
+      })
+      Promise.all([promise1, promise2]).then(() => {
+        expect(callback).toHaveBeenCalledTimes(2)
+        expect(natureRemo1.update).toHaveBeenCalledTimes(1)
         expect(natureRemo2.update).toHaveBeenCalledTimes(2)
         done()
       })
