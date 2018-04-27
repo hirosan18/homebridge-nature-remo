@@ -127,6 +127,7 @@ class NatureRemo {
                 done()
                 resolve()
               }).catch((e) => {
+                this.log(`>> [Fail] "${command.name}"`)
                 reject(e)
               })
             })
