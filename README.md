@@ -1,5 +1,8 @@
 # homebridge-nature-remo
 
+[![npm version](https://badge.fury.io/js/homebridge-nature-remo.svg)](https://badge.fury.io/js/homebridge-nature-remo)
+[![MIT License](http://img.shields.io/badge/license-ISC-blue.svg?style=flat)](LICENSE)
+
 Nature Remo plugin for homebridge: https://github.com/nfarina/homebridge
 
 ## feature
@@ -20,17 +23,7 @@ NatureRemoをSiriとHomekit(iOSのHomeアプリ)でコントロールするた�
 Homebridgeの仕様？で、アクセサリ操作は同期処理されるため、上記のようなシーンを実行する場合にSiriがタイムアウトしてしまいます。  
 (\[テレビをON\]のすべてのコマンドが終了した後に\[Blu-rayをON\]のコマンドが開始されるため、複数コマンドを実行する場合にかなり時間がかかる)
 
-![siritimeout](./docs/siritimeout.gif)
-
-↑ タイムアウトするSiri
-
-そのためコマンドを非同期に実行し、アクセサリ操作の結果をすぐさま返却することでタイムアウトを回避しています。  
-(ただし、SiriやHomekitにエラーを通知することができないので、エラーが発生した場合にオンオフの不整合が発生する可能性があります)
-
-また、コマンドの実行タイミングを制御することで、コマンドのDelay中に、他アクセサリ操作のコマンドを実行することができるため、シーン全体の実行時間を短縮しています。
-
-
-*** ただいまシーンの例 ***
+__ ただいまシーンの例 __
 
 |   テレビをON   |  Blu-rayをON |                      エアコンをON                       |
 |----------------|--------------|---------------------------------------------------------|
@@ -54,7 +47,17 @@ Homebridgeの仕様？で、アクセサリ操作は同期処理されるため�
 
 17秒以上かかる
 
-*** このプラグインを使用した場合 ***
+![siritimeout](./docs/siritimeout.gif)
+
+↑ タイムアウトするSiri
+
+そのためコマンドを非同期に実行し、アクセサリ操作の結果をすぐさま返却することでタイムアウトを回避しています。  
+(ただし、SiriやHomekitにエラーを通知することができないので、エラーが発生した場合にオンオフの不整合が発生する可能性があります)
+
+また、コマンドの実行タイミングを制御することで、コマンドのDelay中に、他アクセサリ操作のコマンドを実行することができるため、シーン全体の実行時間を短縮しています。
+
+
+__ 非同期で処理した場合 __
 
 |   テレビをON   |  Blu-rayをON |                        エアコンをON                         |
 |----------------|--------------|-------------------------------------------------------------|
@@ -74,6 +77,10 @@ Homebridgeの仕様？で、アクセサリ操作は同期処理されるため�
 | 決定ボタン     |              |                                                             |
 
 10秒くらいで終わる(はず)
+
+![sirisuccess](./docs/sirisuccess.gif)
+
+↑ 表示上は一瞬で終わる
 
 ## Installation
 
@@ -111,7 +118,7 @@ Timestamp     A/R Flags if Hostname                               Address       
 
 ![natureremo](./docs/natureremo.jpg)
 
-### 3. Get Nature-Remo IR-DATA
+### 3. Get Nature-Remo IRSignal
 
 ```shell
 $ curl -i "http://Remo-XXXX.local/messages" -H "X-Requested-With: curl"
@@ -120,7 +127,7 @@ HTTP/1.0 200 OK
 Server: Remo/1.0.62-gabbf5bd
 Content-Type: application/json
 
-{"format":"us","freq":39,"data":[2360,634,1145,651,561,....]} // ← IR-DATA
+{"format":"us","freq":39,"data":[2360,634,1145,651,561,....]} // ← IRSignal
 ```
 
 
@@ -183,9 +190,9 @@ Note: [config.json sample](./config.sample.json)
   "retryInterval": (option millisec),
   "retry": (option number),
   "command": {
-    "CommandName1": (Nature-Remo IR-DATA),
-    "CommandName2": (Nature-Remo IR-DATA),
-    "CommandName3": (Nature-Remo IR-DATA),
+    "CommandName1": (Nature-Remo IRSignal),
+    "CommandName2": (Nature-Remo IRSignal),
+    "CommandName3": (Nature-Remo IRSignal),
     ...
   },
   // CommandName1 → commandName2 → commandName3
