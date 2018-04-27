@@ -23,7 +23,7 @@ const homebridgeMock = {
   registerAccessory: jest.fn()
 }
 
-describe('TimerQueue', function () {
+describe('NatureRemo', function () {
   it('登録の確認', function () {
     const init = require('../index.js')
     let data
