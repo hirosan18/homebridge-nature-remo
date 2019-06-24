@@ -139,13 +139,23 @@ describe('NatureRemo', function () {
         done()
       })
     })
-    it('request タイムアウト', function (done) {
+    it('request コネクションタイムアウト', function (done) {
       nock(`http://${config.accessories[0].host}`).filteringRequestBody(/.*/, '*').post('/messages', '*').socketDelay(4000).reply(200, {})
 
       const natureRemo = _create(config.accessories[0])
       natureRemo.update()
 
-      natureRemo.request(config.accessories[0].command.on).then(() => {
+      natureRemo.request(config.accessories[0].command.on).catch(() => {
+        done()
+      })
+    })
+    it('request 読み込みタイムアウト', function (done) {
+      nock(`http://${config.accessories[0].host}`).filteringRequestBody(/.*/, '*').post('/messages', '*').reply(4000, {})
+
+      const natureRemo = _create(config.accessories[0])
+      natureRemo.update()
+
+      natureRemo.request(config.accessories[0].command.on).catch(() => {
         done()
       })
     })
