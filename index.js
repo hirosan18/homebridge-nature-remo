@@ -1,17 +1,6 @@
 const TimerQueue = require('timer-queue')
-const http = require('http')
-const deepAssign = require('deep-assign')
+const request = require('request')
 const sleep = require('sleep-promise')
-
-const DEFAULT_REQUEST_PARAMS = {
-  path: '/messages',
-  port: 80,
-  method: 'POST',
-  headers: {
-    'X-Requested-With': 'curl',
-    'Content-Type': 'application/json'
-  }
-}
 
 let version
 let Service
@@ -49,7 +38,7 @@ class NatureRemo {
         delay = command.delay >= 0 ? command.delay : 0
         command = command.command
       }
-      return {name: command, postData: commandList[command], delay}
+      return { name: command, postData: commandList[command], delay }
     }
     this.on = (config.on || []).map(convert)
     this.off = (config.off || []).map(convert)
@@ -64,36 +53,27 @@ class NatureRemo {
   }
   request (postData = {}) {
     return new Promise((resolve, reject) => {
-      const postDataStr = JSON.stringify(postData)
-      const options = deepAssign({}, DEFAULT_REQUEST_PARAMS, {
-        host: this.host,
+      const options = {
+        uri: `http://${this.host}/messages`,
         headers: {
-          'Content-Length': postDataStr.length
-        }
-      })
-      let data = ''
-      const req = http.request(options, res => {
-        res.setEncoding('utf8')
-        if (res.statusCode !== 200) {
-          reject(new Error(res.statusCode))
-          return
-        }
-        res.on('data', chunk => {
-          data += chunk.toString()
-        })
-        res.on('end', () => {
-          resolve(data)
-        })
-      })
-      if (this.timeout > 0) {
-        req.setTimeout(this.timeout)
+          'X-Requested-With': 'curl',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(postData)
       }
-      req.on('error', reject)
-      req.on('timeout', () => {
-        req.destroy()
+      if (this.timeout > 0) {
+        options.timeout = this.timeout
+      }
+
+      this.log(`>> [request]`)
+      request.post(options, (error, res, body) => {
+        if (!error && res.statusCode === 200) {
+          resolve(body)
+        } else {
+          this.log(JSON.stringify(res))
+          reject(error || new Error(res.statusCode))
+        }
       })
-      req.write(postDataStr)
-      req.end()
     })
   }
   getServices () {
