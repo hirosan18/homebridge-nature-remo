@@ -33,7 +33,7 @@ class NatureRemo {
     this.retryInterval = config.retryInterval || 500
 
     const convert = (command) => {
-      let delay
+      let delay = 0
       if (typeof command !== 'string') {
         delay = command.delay >= 0 ? command.delay : 0
         command = command.command
