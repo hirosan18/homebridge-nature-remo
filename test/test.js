@@ -140,7 +140,7 @@ describe('NatureRemo', function () {
       })
     })
     it('request コネクションタイムアウト', function (done) {
-      nock(`http://${config.accessories[0].host}`).filteringRequestBody(/.*/, '*').post('/messages', '*').socketDelay(4000).reply(200, {})
+      nock(`http://${config.accessories[0].host}`).filteringRequestBody(/.*/, '*').post('/messages', '*').delayConnection(4000).reply(200, {})
 
       const natureRemo = _create(config.accessories[0])
       natureRemo.update()

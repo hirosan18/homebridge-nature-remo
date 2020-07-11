@@ -51,6 +51,7 @@ class NatureRemo {
     })
     statusList[this.name] = false
   }
+
   request (postData = {}) {
     return new Promise((resolve, reject) => {
       const options = {
@@ -76,6 +77,7 @@ class NatureRemo {
       })
     })
   }
+
   getServices () {
     this.log(`start homebridge Server ${this.name}`)
 
@@ -91,6 +93,7 @@ class NatureRemo {
 
     return [this.informationService, this.switchService]
   }
+
   setState (on, callback) {
     this.log(`[Setting] ${on}`)
     this.lastCommandTime = Date.now()
@@ -131,11 +134,13 @@ class NatureRemo {
 
     callback()
   }
+
   getState (callback) {
     const value = statusList[this.name] || false
     this.log(`<<< [Getting] ${value}`)
     return callback(null, value)
   }
+
   update (on) {
     if (typeof on === 'undefined') {
       on = statusList[this.name]
